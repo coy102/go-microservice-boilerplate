@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "go-microservices.org/core/proto";
+
+service Auth {
+	rpc RequestToken(AuthRequest) returns (AuthResponse) {}
+    rpc ValidateAccessToken(AuthRequest) returns (AuthResponse) {}
+    rpc ValidateRefreshToken(AuthRequest) returns (AuthResponse) {}
+    rpc RequestAccessTokenSession(AuthRequest) returns (AuthResponse) {}
+    rpc RequestRefreshTokenSession(AuthRequest) returns (AuthResponse) {}
+    rpc ValidateAccessTokenSession(AuthRequest) returns (AuthResponse) {}
+    rpc ValidateRefreshTokenSession(AuthRequest) returns (AuthResponse) {}
+    rpc RemoveTokenSession(AuthRequest) returns (AuthResponse) {}
+}
+
+message AuthRequest {
+    string accessToken = 1;
+    string refreshToken = 2;
+    TokenData tokenParam = 3;
+}
+
+message AuthResponse {
+	AuthData authToken = 1;
+}
+
+message AuthData {
+    string sessionKey = 1;
+	string accessToken = 2;
+	string refreshToken = 3;
+	int64 expireAt = 4;
+    TokenData parsedToken = 5;
+    string message = 6;
+    bool success = 7;
+}
+
+message TokenData {
+    int32 userID = 1;
+    repeated AccessPermission permissions = 2;
+}
+
+message AccessPermission {
+	string menu = 1;
+	repeated string control = 2;
+}

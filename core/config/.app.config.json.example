@@ -1,0 +1,7 @@
+{
+    "AppName": "Application Name",
+    "GRPCTimeout": 10,
+    "CacheExpiry": 300,
+    "CacheCleanup": 600,
+    "DefaultPageLimit": 3
+}

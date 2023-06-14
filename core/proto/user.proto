@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "go-microservices.org/core/proto";
+
+service User {
+	rpc Login(UserRequest) returns (UserResponse) {}
+	rpc RefreshToken(UserRequest) returns (UserResponse) {}
+	rpc Logout(UserRequest) returns (UserResponse) {}
+	rpc ChangePassword(UserRequest) returns (UserResponse) {}
+	rpc CreateUser(UserRequest) returns (UserResponse) {}
+	rpc CreateUserPermission(UserRequest) returns (UserResponse) {}
+	rpc CreateUserRole(UserRequest) returns (UserResponse) {}
+}
+
+message UserRequest {
+	UserData user = 1;
+    string accessToken = 2;
+	string refreshToken = 3;
+	string newPassword = 4;
+	UserPermission permission = 5;
+	UserRole role = 6;
+}
+
+message UserResponse {
+	UserInfo info = 1;
+}
+
+message UserInfo {
+	UserData user = 1;
+	string accessToken = 2;
+	string refreshToken = 3;
+	int64 expireAt = 4;
+	string message = 5;
+	bool success = 6;
+}
+
+message UserData {
+	int32 ID = 1;
+	string username = 2;
+	string password = 3;
+	string fullname = 4;
+	string roleName = 5;
+	repeated UserPermission permissions = 6;
+}
+
+message UserPermission {
+	string menu = 1;
+	string description = 2;
+	repeated string control = 3;
+}
+
+message UserRole {
+	string name = 1;
+	string description = 2;
+	repeated UserPermission permissions = 3;
+}

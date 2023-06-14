@@ -1,0 +1,34 @@
+type User {
+    logout: UserResponse!
+}
+
+input UserParam {
+    username: String!
+	password: String!
+	fullname: String
+    roleName: String!
+}
+
+input UserPermissionParam {
+    menu: String!
+    description: String
+    control: [String!]
+}
+
+input UserRoleParam {
+    name: String!
+    description: String
+    permissions: [UserPermissionParam!]!
+}
+
+type UserMutation {
+    changePassword(currentPassword: String!, newPassword: String!, confirmNewPassword: String!): UserResponse!
+    create(param: UserParam!): UserResponse! @hasPermission(control: [C])
+    createPermission(param: UserPermissionParam!): UserResponse! @hasPermission(control: [C])
+    createRole(param: UserRoleParam!): UserResponse! @hasPermission(control: [C])
+}
+
+type UserResponse {
+    message: String!
+    success: Boolean!
+}

@@ -1,0 +1,16 @@
+directive @hasPermission(control: [AccessControl!]!) on FIELD_DEFINITION
+
+enum AccessControl {
+	C	# CREATE
+	R	# READ
+	U	# UPDATE
+	D	# DELETE
+}
+
+type Query {
+	user: User!
+}
+
+type Mutation {
+	user: UserMutation!
+}

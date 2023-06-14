@@ -1,0 +1,35 @@
+type Query {
+	noop: Boolean!
+}
+
+type Mutation {
+	login(userID: String!, password: String!, refreshToken: String!): LoginData!
+}
+
+type Login {
+	token: String!
+	refreshToken: String!
+	expireAt: Int!
+	message: String!
+	permissions: [UserPermission!]!
+}
+
+type LoginData {
+	user: UserData
+	accessToken: String!
+	refreshToken: String!
+	expireAt: Int!
+	message: String!
+	success: Boolean!
+}
+
+type UserData {
+	username: String!
+	fullname: String!
+	permissions: [UserPermission!]!
+}
+
+type UserPermission {
+	menu: String!
+	control: [String!]!
+}

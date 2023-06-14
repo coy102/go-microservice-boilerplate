@@ -1,0 +1,58 @@
+def ECR_REPO = '475194349913.dkr.ecr.ap-southeast-1.amazonaws.com/dmaa/api'
+def GITHUB_REPO = 'https://github.com/zebraxid/dmaa-backend.git'
+node {
+    stage('Init'){
+        def dockerHome = tool 'docker'
+        env.PATH = "${dockerHome}/bin:${env.PATH}"
+    }
+    stage('Clone'){
+       git branch: 'develop', credentialsId: 'sysops@zebrax.id', url: GITHUB_REPO
+    }
+    script{
+        echo 'This is API, lets Deploy'
+        stage('Preparing workspace..'){
+            sh label: '', script: '''
+            cd core
+            ./protoc.sh
+            cd ../api
+            go run github.com/99designs/gqlgen generate
+            cd login
+            go run github.com/99designs/gqlgen generate
+            '''
+        }
+        stage('Build Docker'){
+            sh label: '', script: '''
+            sudo docker build -f _api.Dockerfile -t ''' + ECR_REPO + ''' .
+            '''
+        }
+        stage('Push to ECR'){
+            withDockerRegistry(credentialsId: 'ecr:ap-southeast-1:devops', toolName: 'docker', url: 'https://'+ECR_REPO) {
+                docker.image(ECR_REPO).push('latest')
+            }
+        }
+        stage('Rolling update deployment'){
+            script{
+                sh 'kubectl config use-context zebrax-dev'
+                
+                K8S_IMAGE_ID = sh(returnStdout: true, script: '''
+                        kubectl get deployment api -o=jsonpath='{$.spec.template.spec.containers[*].image}' -n dmaa-dev
+                ''').trim()
+            }
+            script{
+                if (K8S_IMAGE_ID == ECR_REPO) {
+                    sh 'kubectl set image deployment api api='+ECR_REPO+':latest -n dmaa-dev'
+                }else{
+                    sh 'kubectl set image deployment api api='+ECR_REPO+' -n dmaa-dev'
+                }
+            }
+        }
+        stage('Cleaning up docker images'){
+            sh '''
+            sudo docker rmi -f $(sudo docker images | grep dmaa/api | awk '{print $1,$3}' | grep -v IMAGE | grep -v golang | awk '{print $2}')
+            '''
+        }
+    }
+    stage('Cleaning up workspace'){
+       cleanWs()
+    }
+}
